@@ -294,18 +294,25 @@ def plot_transition_flow(
     
     fig, ax = plt.subplots(figsize=figsize)
     
-    # This is a simplified flow diagram
-    # A full implementation would use networkx or similar for proper flow layout
-    
+    # Create comprehensive flow diagram with proper positioning
     buckets = transition_matrix.index.tolist()
     n_buckets = len(buckets)
     
-    # Create positions for buckets (circular layout)
-    angles = np.linspace(0, 2*np.pi, n_buckets, endpoint=False)
-    positions = {
-        bucket: (np.cos(angle), np.sin(angle)) 
-        for bucket, angle in zip(buckets, angles)
-    }
+    # Create positions for buckets in a circular layout for better visibility
+    if n_buckets <= 4:
+        # For few buckets, use a simple layout
+        positions = {
+            bucket: (i % 2, i // 2) 
+            for i, bucket in enumerate(buckets)
+        }
+    else:
+        # For many buckets, use circular layout
+        angles = np.linspace(0, 2*np.pi, n_buckets, endpoint=False)
+        radius = 1.5
+        positions = {
+            bucket: (radius * np.cos(angle), radius * np.sin(angle)) 
+            for bucket, angle in zip(buckets, angles)
+        }
     
     # Draw buckets as circles
     for bucket, (x, y) in positions.items():

@@ -21,7 +21,7 @@ def create_test_data():
     
     data = []
     contracts = [f"C{i:03d}" for i in range(50)]
-    dates = pd.date_range('2023-01-01', periods=12, freq='M')
+    dates = pd.date_range('2023-01-01', periods=12, freq='ME')
     
     for contract in contracts:
         current_bucket = 0

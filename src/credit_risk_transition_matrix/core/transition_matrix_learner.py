@@ -442,15 +442,65 @@ class TransitionMatrixLearner:
         if not self.is_fitted_:
             raise ValueError("Model must be fitted before validation. Call fit() first.")
         
-        # This is a placeholder for basic validation
-        # Full implementation would include proper validation logic
+        # Prepare test data using the same processor
+        processed_test = self.data_processor_.process_data(
+            df=test_data,
+            id_col=self._original_columns['id'],
+            time_col=self._original_columns['time'],
+            bucket_col=self._original_columns['bucket'],
+            segment_col=self._original_columns['segment']
+        )
         
         results = {}
         
         if 'accuracy' in metrics:
-            # Placeholder accuracy calculation
-            results['accuracy'] = 0.85  # Mock value
+            # Calculate prediction accuracy
+            predicted_states = self.predict_transitions(processed_test, periods=1)
             
+            # Find actual next states in test data
+            test_grouped = processed_test.groupby('client_id')
+            actual_transitions = 0
+            correct_predictions = 0
+            
+            for client_id, client_data in test_grouped:
+                if len(client_data) > 1:
+                    # Sort by observation date
+                    client_data = client_data.sort_values('observation_date')
+                    
+                    for i in range(len(client_data) - 1):
+                        current_bucket = client_data.iloc[i]['bucket_assigned']
+                        next_bucket = client_data.iloc[i + 1]['bucket_assigned']
+                        
+                        # Get prediction for this transition
+                        client_pred = predicted_states.get(client_id, {})
+                        if current_bucket in client_pred:
+                            predicted_probs = client_pred[current_bucket]
+                            # Use most likely bucket as prediction
+                            predicted_bucket = max(predicted_probs, key=predicted_probs.get)
+                            
+                            actual_transitions += 1
+                            if predicted_bucket == next_bucket:
+                                correct_predictions += 1
+            
+            # Calculate accuracy
+            if actual_transitions > 0:
+                results['accuracy'] = correct_predictions / actual_transitions
+            else:
+                results['accuracy'] = 0.0
+        
+        if 'stability' in metrics:
+            # Calculate matrix stability (diagonal dominance)
+            diagonal_sum = np.trace(self.transition_matrix_)
+            total_sum = self.transition_matrix_.sum().sum()
+            results['stability'] = diagonal_sum / total_sum if total_sum > 0 else 0.0
+        
+        if 'coverage' in metrics:
+            # Calculate data coverage
+            total_transitions = self.transition_matrix_.sum().sum()
+            non_zero_cells = (self.transition_matrix_ > 0).sum().sum()
+            total_cells = self.transition_matrix_.shape[0] * self.transition_matrix_.shape[1]
+            results['coverage'] = non_zero_cells / total_cells
+        
         return results
     
     def __repr__(self) -> str:

@@ -17,7 +17,7 @@ def sample_data():
     
     # Create 100 contracts with monthly observations over 2 years
     contracts = [f"CONT_{i:03d}" for i in range(100)]
-    dates = pd.date_range('2022-01-01', '2023-12-31', freq='M')
+    dates = pd.date_range('2022-01-01', '2023-12-31', freq='ME')
     
     data = []
     for contract in contracts:

@@ -208,6 +208,7 @@ __marimo__/
 
 # Project specific files - Status and implementation docs (keep local only)
 IMPLEMENTATION_STATUS.md
+IMPLEMENTATION_COMPLETE.md
 PHASE1_SUMMARY.md
 context.md
 
