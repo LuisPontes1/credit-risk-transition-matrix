@@ -205,3 +205,14 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project specific files - Status and implementation docs (keep local only)
+IMPLEMENTATION_STATUS.md
+PHASE1_SUMMARY.md
+context.md
+
+# Output directories
+output/
+
+# Test files (keep in tests/ directory only, ignore root level test files)
+/test_*.py
