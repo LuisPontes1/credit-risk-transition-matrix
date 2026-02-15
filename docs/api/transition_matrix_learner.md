@@ -302,6 +302,7 @@ print(f"Model accuracy: {validation['accuracy']:.2%}")
 
 ## See Also
 
+- [IFRS 9 API Reference](ifrs9.md)
 - [Visualization Functions](visualization.md)
 - [Risk Metrics](risk_metrics.md)
 - [Getting Started Tutorial](../tutorials/getting_started.ipynb)

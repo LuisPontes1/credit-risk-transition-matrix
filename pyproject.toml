@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "credit-risk-transition-matrix"
-version = "0.1.0"
+version = "0.3.0"
 description = "Professional Python library for credit risk analysis using transition matrices"
 authors = [
     {name = "Luis Pontes", email = "luis@example.com"}
@@ -14,7 +14,7 @@ requires-python = ">=3.8"
 license = {text = "MIT"}
 keywords = ["credit-risk", "transition-matrix", "risk-analysis", "finance", "banking"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Financial and Insurance Industry",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
@@ -32,7 +32,6 @@ dependencies = [
     "numpy>=1.21.0",
     "matplotlib>=3.5.0",
     "seaborn>=0.11.0",
-    "scipy>=1.7.0",
 ]
 
 [project.optional-dependencies]
@@ -41,17 +40,14 @@ interactive = [
     "jupyter>=1.0.0",
     "ipywidgets>=7.0.0",
 ]
-ml = [
-    "scikit-learn>=1.0.0",
+databricks = [
+    "mlflow>=2.0.0",
 ]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "black>=22.0.0",
     "flake8>=5.0.0",
-    "mypy>=0.991",
-    "sphinx>=5.0.0",
-    "sphinx-rtd-theme>=1.0.0",
 ]
 
 [project.urls]

@@ -217,3 +217,12 @@ output/
 
 # Test files (keep in tests/ directory only, ignore root level test files)
 /test_*.py
+
+# Auto-generated reports and logs
+_test_out*.txt
+_nb_out*.txt
+_doc_extracted.txt
+*.log
+
+# Executed notebooks (keep source only)
+*_executed.ipynb

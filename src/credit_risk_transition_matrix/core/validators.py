@@ -153,6 +153,44 @@ def validate_bucket_column(df: pd.DataFrame, bucket_col: str, buckets: List[int]
         raise ValueError(f"Bucket column '{bucket_col}' cannot contain negative values")
 
 
+def validate_rating_column(
+    df: pd.DataFrame, 
+    rating_col: str, 
+    rating_labels: List[str]
+) -> None:
+    """
+    Validate rating column for pre-assigned rating scale mode.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input dataframe
+    rating_col : str
+        Name of the rating column
+    rating_labels : List[str]
+        Allowed rating labels (ordered best → worst)
+        
+    Raises
+    ------
+    ValueError
+        If rating column validation fails
+    """
+    
+    if df[rating_col].isnull().any():
+        raise ValueError(f"Rating column '{rating_col}' cannot contain null values")
+    
+    # Convert to string for comparison
+    values = df[rating_col].astype(str).unique()
+    allowed = set(str(r) for r in rating_labels)
+    unknown = set(values) - allowed
+    
+    if unknown:
+        raise ValueError(
+            f"Rating column '{rating_col}' contains unknown values: {sorted(unknown)}. "
+            f"Allowed ratings: {rating_labels}"
+        )
+
+
 def validate_segment_column(df: pd.DataFrame, segment_col: str) -> None:
     """
     Validate segment column requirements.

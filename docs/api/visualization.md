@@ -424,5 +424,6 @@ def create_risk_report(learner, save_dir="./outputs/"):
 ## See Also
 
 - [TransitionMatrixLearner API](transition_matrix_learner.md)
+- [IFRS 9 API Reference](ifrs9.md)
 - [Risk Metrics](risk_metrics.md)
 - [Advanced Analysis Tutorial](../tutorials/advanced_analysis.ipynb)

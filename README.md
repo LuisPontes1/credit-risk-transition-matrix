@@ -1,248 +1,358 @@
-# Credit Risk Transition Matrix Library
+# Contract Risk Engine (SaaS-Ready)
 
-A professional Python library for credit risk analysis using transition matrices. Designed for data scientists, risk analysts, and financial institutions to analyze credit portfolio behavior, predict defaults, and generate risk reports.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Tests](https://img.shields.io/badge/tests-212%20passed-success)](https://github.com/LuisPontes1/credit-risk-transition-matrix)
 
-## 🎯 Overview
+**Advances in Credit Risk Modeling for IFRS 9 / CPC 4.966 Compliance**
 
-This library provides comprehensive tools for:
-- **Transition Matrix Calculation**: Calculate migration probabilities between risk buckets
-- **Professional Visualizations**: Generate publication-ready heatmaps and charts
-- **Risk Analytics**: PD (Probability of Default) calculations and portfolio metrics
-- **Segmented Analysis**: Compare different portfolio segments
-- **Model Validation**: Backtesting and performance metrics
+The **Contract Risk Engine** is a high-performance, modular Python library designed for financial institutions to calculate **Expected Credit Loss (ECL)** at the contract level. It orchestrates the full lifecycle of credit risk modeling — from empirical transition matrices to forward-looking macro overlays and SICR staging.
 
-## 🚀 Quick Start
+---
 
-### Installation
+## 🚀 Key Features
 
-**Development Version (Current):**
+- **End-to-End ECL Pipeline**: Orchestrates PD, LGD, EAD, SICR, and Maturity models into a single cohesive calculation.
+- **IFRS 9 / CPC 4.966 Compliant**:
+  - **Staging**: Automated classification (Stage 1/2/3) based on PD deterioration (relative/absolute) and backstops.
+  - **Forward-Looking**: Semantic macro-economic scenarios (Optimistic, Base, Pessimistic) with probability weighting.
+  - **Lifetime ECL**: Multi-period discounting with effective interest rates.
+- **Advanced Modelling Modules**:
+  - **Transition Matrix Learner**: Estimates migration probabilities from historical data.
+  - **EAD Engine**: Empirical CCF estimation for revolving products.
+  - **Maturity Engine**: Behavior-based tenure calculation (halflife) for checking accounts/credit cards.
+  - **LGD Rating**: Downturn calibration and cure rate analysis.
+- **Backtesting Suite**: Native support for PD calibration (Binomial test), Discrimination (AUC/Gini), and LGD validation.
+
+---
+
+## 🏗️ Architecture
+
+The engine uses a modular architecture where the `ContractRiskEngine` acts as the orchestrator, integrating specialized components.
+
+```mermaid
+graph TD
+    Data[Input Data] --> CRE{ContractRiskEngine}
+    ExternalPD[External PD Model] --> CRE
+    
+    subgraph "Core Modules"
+        CRE --> EAD[EAD Engine]
+        CRE --> SICR[SICR Staging]
+        CRE --> LGD[LGD Rating]
+        CRE --> MAT[Maturity Engine]
+    end
+    
+    subgraph "Overlays"
+        Macro[Macro Scenarios] --> FL[Forward-Looking]
+        FL --> CRE
+    end
+    
+    CRE --> ECL[ECL Calculation]
+    ECL --> Reporting[Regulatory Reports]
+```
+
+---
+
+## 📦 Installation
+
 ```bash
-# Clone the repository
 git clone https://github.com/LuisPontes1/credit-risk-transition-matrix.git
 cd credit-risk-transition-matrix
-
-# Install in development mode
 pip install -e .
-
-# Or install dependencies directly
-pip install -r requirements.txt
 ```
 
-**PyPI Release (Coming Soon):**
+Dependências opcionais:
+
 ```bash
-pip install credit-risk-transition-matrix
+pip install -e ".[interactive]"  # Plotly + Jupyter
+pip install mlflow               # Integração MLflow (Databricks)
 ```
 
-### Basic Usage
+## Quick Start
 
 ```python
 from credit_risk_transition_matrix import TransitionMatrixLearner
 
-# Initialize learner with custom buckets
 learner = TransitionMatrixLearner(
     buckets=[0, 15, 30, 60, 90, 120, 180, 240, 360],
     time_horizon=12
 )
 
-# Fit on your data
 learner.fit(
-    df_panel,
+    df,
     id_col="id_contrato",
     time_col="data_ref",
     bucket_col="dias_atraso"
 )
 
-# Generate professional heatmaps
+# Matriz de transição
+print(learner.transition_matrix_)
+
+# Heatmap (matplotlib)
 learner.plot_heatmaps(modes=["global"], save_dir="./outputs/")
 
-# Calculate PD metrics
+# PD por bucket
 pd_results = learner.calculate_pd(time_horizon=12)
 ```
 
-## 📊 Key Features
+## Funcionalidades
 
-### 1. Flexible Bucket Definitions
-- Support for custom risk buckets (days past due)
-- Default configuration: [0, 15, 30, 60, 90, 120, 180, 240, 360+ days]
-- Automatic bucket assignment and validation
+### Matriz de Transição
 
-### 2. Professional Visualizations
-- **Global Heatmaps**: Publication-ready transition matrices
-- **Segmented Analysis**: Compare different portfolio segments
-- **Flow Diagrams**: Visualize transition patterns
-- **Trend Analysis**: Time series of migration patterns
-
-### 3. Advanced Analytics
-- **PD Calculations**: 1-year and lifetime default probabilities
-- **Portfolio Metrics**: Migration rates and concentration measures
-- **Stress Testing**: Scenario analysis capabilities
-- **Model Validation**: Backtesting and performance metrics
-
-### 4. Data Requirements
-
-Your input data should have the following structure:
-
-| Column | Type | Description |
-|--------|------|-------------|
-| `id_contrato` | string | Unique contract identifier |
-| `data_ref` | datetime | Reference date for observation |
-| `dias_atraso` | int | Days past due (bucket value) |
-| `segmento` | string (optional) | Portfolio segment for grouped analysis |
-| `valor_exposicao` | float (optional) | Exposure amount for weighted analysis |
-
-## 📈 Advanced Usage
-
-### Segmented Analysis
+| Feature | Descrição |
+|---------|-----------|
+| Buckets customizáveis | Qualquer definição de faixas de atraso (dias) |
+| Análise segmentada | Matrizes por segmento de carteira via `segment_col` |
+| Ponderação por EAD | Matrizes ponderadas por exposição via `weight_col` |
+| Spark DataFrame | Aceita PySpark DataFrames (conversão automática) |
 
 ```python
-# Analyze by portfolio segments
+# Análise segmentada + ponderada por EAD
 learner.fit(
-    df_panel,
-    id_col="id_contrato", 
+    df,
+    id_col="id_contrato",
     time_col="data_ref",
     bucket_col="dias_atraso",
-    segment_col="produto_tipo"  # Segment by product type
+    segment_col="produto",
+    weight_col="valor_exposicao"
 )
 
-# Generate segment comparison
-learner.plot_heatmaps(modes=["global", "segmented"], save_dir="./analysis/")
-
-# Get matrices for all segments
-matrices = learner.transform(modes=['global', 'segmented'])
+matrices = learner.transform(modes=["global", "segmented"])
 ```
 
-### Predictive Analysis
+### PD Engine
+
+Funções standalone e métodos de conveniência no `TransitionMatrixLearner`:
 
 ```python
-# Predict future state distributions
-current_state = "30-59"  # Current bucket
-future_distribution = learner.predict_transitions(current_state, n_periods=6)
+from credit_risk_transition_matrix import (
+    cumulative_pd,
+    marginal_pd,
+    pd_term_structure,
+    survival_curve,
+    cure_rates,
+    absorbing_analysis
+)
 
-# Calculate portfolio-level PD
-pd_metrics = learner.calculate_pd(
+# PD cumulativa para 12 períodos
+cpd = cumulative_pd(learner.transition_matrix_, n_periods=12)
+
+# PD marginal (condicional por período)
+mpd = marginal_pd(learner.transition_matrix_, n_periods=12)
+
+# Curva de sobrevivência
+surv = survival_curve(learner.transition_matrix_, n_periods=12)
+
+# Term structure completa (cumulative + marginal + survival)
+ts = learner.get_pd_term_structure(n_periods=12)
+
+# Cure rates (migração para faixas melhores)
+cures = learner.get_cure_rates()
+
+# Absorbing analysis (tempo esperado até default)
+analysis = learner.get_absorbing_analysis()
+print(analysis['expected_steps'])
+print(analysis['absorption_probabilities'])
+```
+
+### Predição de Estados Futuros
+
+```python
+# Distribuição futura a partir de um bucket
+future = learner.predict_transitions("30-59", n_periods=6)
+
+# PD por bucket com horizonte customizado
+pd_results = learner.calculate_pd(
     time_horizon=12,
     default_buckets=["240-359", "360+"]
 )
 ```
 
-### Model Validation
+### Validação do Modelo
 
 ```python
-# Validate on out-of-time data
-validation_results = learner.validate_model(
+results = learner.validate_model(
     test_data=df_test,
-    metrics=['accuracy', 'auc']
+    metrics=["accuracy", "stability", "coverage"]
 )
+# accuracy: % de transições com bucket mais provável correto
+# stability: dominância diagonal da matriz
+# coverage: % de células não-zero
 ```
 
-## 🛠️ Development Setup
+### Visualizações
 
-### For Contributors
-
-```bash
-# Clone repository
-git clone https://github.com/LuisPontes1/credit-risk-transition-matrix.git
-cd credit-risk-transition-matrix
-
-# Install development dependencies
-pip install -r requirements-dev.txt
-
-# Install in development mode
-pip install -e .
-
-# Run tests
-python -m pytest tests/ -v
-
-# Run example
-python examples/basic_usage.py
-
-# Format code
-black src/ tests/ examples/
+**Matplotlib** (padrão):
+```python
+learner.plot_heatmaps(modes=["global", "segmented"], save_dir="./outputs/")
 ```
 
-### Project Status
+**Plotly** (interativo, ideal para Databricks/Jupyter):
+```python
+from credit_risk_transition_matrix.visualization.plotly_charts import (
+    plot_heatmap_plotly,
+    plot_pd_curve_plotly
+)
 
-- ✅ **Phase 1 Complete**: Core functionality and basic visualizations
-- 🔄 **Phase 2 In Progress**: Advanced analytics and validation framework
-- ⏭️ **Phase 3 Planned**: Performance optimization and interactive features
-- 🏢 **Phase 4 Planned**: Enterprise features and regulatory compliance
+fig = plot_heatmap_plotly(learner.transition_matrix_, title="Matriz Global")
+fig.show()
 
-## 📚 Documentation
+cpd = cumulative_pd(learner.transition_matrix_, n_periods=12)
+fig = plot_pd_curve_plotly(cpd, title="PD Term Structure")
+fig.show()
+```
 
-### API Reference
-- [TransitionMatrixLearner API](docs/api/transition_matrix_learner.md)
-- [Visualization Functions](docs/api/visualization.md)
-- [Risk Metrics](docs/api/risk_metrics.md)
+### Serialização
 
-### Tutorials
-- [Getting Started Tutorial](docs/tutorials/getting_started.ipynb)
-- [Advanced Analysis Examples](docs/tutorials/advanced_analysis.ipynb)
-- [Regulatory Compliance](docs/tutorials/ifrs9_compliance.ipynb)
+```python
+# Salvar modelo
+learner.save("model/transition_model.pkl")
 
-### Mathematical Background
-- [Transition Matrix Theory](docs/theory/transition_matrices.md)
-- [PD Calculation Methods](docs/theory/pd_calculations.md)
+# Carregar modelo
+loaded = TransitionMatrixLearner.load("model/transition_model.pkl")
+loaded.predict_transitions("0-14", n_periods=3)
+```
 
-## 🏦 Regulatory Compliance
+### MLflow (Databricks)
 
-This library supports calculations required for:
-- **IFRS 9** Expected Credit Loss models
-- **CECL** Current Expected Credit Loss methodology
-- **Basel** regulatory capital calculations
-- Audit trail and model documentation
-
-## 🤝 Contributing
-
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-### Areas for Contribution
-- Additional risk metrics
-- New visualization types
-- Performance optimizations
-- Documentation improvements
-- Bug fixes and testing
-
-## 📄 License
-
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🔗 Links
-
-- **PyPI**: https://pypi.org/project/credit-risk-transition-matrix/
-- **Documentation**: https://credit-risk-transition-matrix.readthedocs.io/
-- **Source Code**: https://github.com/LuisPontes1/credit-risk-transition-matrix
-- **Issue Tracker**: https://github.com/LuisPontes1/credit-risk-transition-matrix/issues
-
-## 📞 Support
-
-- **Documentation**: Check our comprehensive docs
-- **Issues**: Report bugs via GitHub issues
-- **Discussions**: Use GitHub discussions for questions
-- **Email**: For commercial support inquiries
-
-## 🎯 Roadmap
-
-### Phase 1 (Current) ✅
-- Core TransitionMatrixLearner class
-- Basic visualization capabilities
-- Global and segmented analysis
-
-### Phase 2 (Next)
-- Advanced analytics and validation framework
-- Interactive Plotly visualizations
-- Performance optimizations
-
-### Phase 3 (Future)
-- Web API endpoints
-- Real-time monitoring capabilities
-- Advanced stress testing tools
-
-### Phase 4 (Long-term)
-- Machine learning integration
-- Automated model selection
-- Cloud deployment options
+```python
+learner.log_to_mlflow(
+    experiment_name="credit_risk_v2",
+    run_name="monthly_calibration",
+    extra_params={"portfolio": "PF"},
+    extra_metrics={"accuracy": 0.85}
+)
+# Loga: params, metrics, transition_matrix.csv como artifact
+```
 
 ---
 
-**Made with ❤️ for the credit risk community**
-Ferramenta para análise de risco de crédito através de matrizes de transição - diagnóstico rápido de inadimplência, geração de heatmaps e calibração de provisões
+## CPC 4966 / IFRS 9
+
+### Stress Testing
+
+Aplique choques na matriz de transição para cenários macroeconômicos:
+
+```python
+from credit_risk_transition_matrix import (
+    apply_scalar_stress,
+    generate_scenarios,
+    weighted_scenario_matrix
+)
+
+# Stress escalar: piora migração por fator 1.5x
+stressed = apply_scalar_stress(learner.transition_matrix_, stress_factor=1.5)
+
+# Gerar cenários (base, otimista, pessimista)
+scenarios = generate_scenarios(learner.transition_matrix_, {
+    'base':        {'factor': 1.0, 'weight': 0.40},
+    'otimista':    {'factor': 0.7, 'weight': 0.30},
+    'pessimista':  {'factor': 1.8, 'weight': 0.30}
+})
+
+# Matriz ponderada por cenário (forward-looking)
+fl_matrix = weighted_scenario_matrix(scenarios)
+```
+
+### Staging (IFRS 9)
+
+Classifique contratos em Stage 1, 2 e 3:
+
+```python
+from credit_risk_transition_matrix import classify_stage, stage_summary
+
+df_staged = classify_stage(
+    df,
+    bucket_col='bucket',
+    bucket_labels=learner.bucket_labels_,
+    stage1_max_bucket='15-29',
+    default_buckets=['360+']
+)
+# → coluna 'stage' adicionada (1, 2 ou 3)
+
+resumo = stage_summary(df_staged, stage_col='stage', ead_col='ead')
+```
+
+### ECL (Expected Credit Loss)
+
+```python
+from credit_risk_transition_matrix import ecl_by_stage, portfolio_ecl
+
+# ECL por contrato (PD 12m p/ S1, lifetime p/ S2, 100% p/ S3)
+df_ecl = ecl_by_stage(
+    transition_matrix=learner.transition_matrix_,
+    df=df_staged,
+    bucket_col='bucket',
+    stage_col='stage',
+    ead_col='ead',
+    lgd=0.45
+)
+
+# Resumo do portfólio por stage
+resumo_ecl = portfolio_ecl(df_ecl)
+```
+
+---
+
+## Dados de Entrada
+
+| Coluna | Tipo | Obrigatório | Descrição |
+|--------|------|:-----------:|-----------|
+| `id_contrato` | str | ✅ | Identificador único do contrato |
+| `data_ref` | datetime | ✅ | Data de referência da observação |
+| `dias_atraso` | int | ✅ | Dias de atraso (usado para bucket assignment) |
+| `segmento` | str | ❌ | Segmento da carteira |
+| `valor_exposicao` | float | ❌ | Exposição (EAD) para ponderação |
+
+## Notebook Demo
+
+Veja o notebook completo com dados fictícios:
+
+📓 [`notebooks/demo.ipynb`](notebooks/demo.ipynb) — demonstra todas as funcionalidades com uma carteira simulada de 500 contratos.
+
+## Testes
+
+```bash
+pip install -e ".[dev]"
+python -m pytest tests/ -v
+```
+
+## Estrutura do Projeto
+
+```
+credit-risk-transition-matrix/
+├── src/credit_risk_transition_matrix/
+│   ├── core/
+│   │   ├── transition_matrix_learner.py  # Classe principal
+│   │   ├── pd_engine.py                  # Motor de PD
+│   │   ├── stress_testing.py             # Stress testing & cenários
+│   │   ├── staging.py                    # Staging IFRS 9
+│   │   ├── ecl_calculator.py             # ECL Calculator
+│   │   ├── data_processor.py             # Processamento vetorizado
+│   │   └── validators.py                 # Validação de inputs
+│   ├── visualization/
+│   │   ├── heatmaps.py                   # Matplotlib heatmaps
+│   │   └── plotly_charts.py              # Plotly interativo
+│   └── utils/
+│       └── config.py                     # Configuração padrão
+├── tests/
+│   ├── test_transition_matrix_learner.py
+│   ├── test_pd_engine.py
+│   ├── test_stress_testing.py
+│   ├── test_staging.py
+│   ├── test_ecl.py
+│   └── test_comprehensive.py
+├── notebooks/
+│   └── demo.ipynb                        # Notebook demonstrativo
+└── pyproject.toml
+```
+
+## Licença
+
+MIT — ver [LICENSE](LICENSE).
+
+---
+
+**Ferramenta para análise de risco de crédito** — matrizes de transição, PD term structure, stress testing, staging IFRS 9 e ECL.
+

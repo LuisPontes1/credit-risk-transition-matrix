@@ -132,56 +132,16 @@ def calculate_vintage_analysis(
 
 ## Advanced Analytics
 
-### Expected Credit Loss (ECL)
+### IFRS 9 — Stress Testing, Staging & ECL
 
-Calculate IFRS 9 Expected Credit Loss.
+For complete IFRS 9 / CPC 4966 functionality including **Stress Testing**, **Staging**, and **ECL Calculator**, see the dedicated reference:
 
-```python
-def calculate_ecl(
-    portfolio_data: pd.DataFrame,
-    transition_matrix: pd.DataFrame,
-    lgd_by_bucket: Dict[str, float],
-    ead_col: str = "exposure",
-    time_horizon: int = 12
-) -> Dict[str, float]
-```
+> **[IFRS 9 API Reference](ifrs9.md)**
 
-**Parameters:**
-- `portfolio_data`: Current portfolio positions
-- `transition_matrix`: Transition probability matrix
-- `lgd_by_bucket`: Loss Given Default by bucket
-- `ead_col`: Exposure at Default column
-- `time_horizon`: ECL calculation horizon
-
-**Returns:** ECL metrics by bucket and total
-
-### Stress Testing
-
-Perform stress testing on transition matrices.
-
-```python
-def apply_stress_scenario(
-    baseline_matrix: pd.DataFrame,
-    stress_factors: Dict[str, float],
-    scenario_name: str = "Stress"
-) -> pd.DataFrame
-```
-
-**Parameters:**
-- `baseline_matrix`: Baseline transition matrix
-- `stress_factors`: Stress multipliers by transition type
-- `scenario_name`: Name for stress scenario
-
-**Returns:** Stressed transition matrix
-
-**Example Stress Factors:**
-```python
-stress_factors = {
-    'deterioration': 1.5,  # 50% increase in downgrades
-    'improvement': 0.7,    # 30% decrease in upgrades
-    'default': 2.0         # 100% increase in defaults
-}
-```
+Key functions:
+- `apply_scalar_stress()` / `apply_z_shift()` / `generate_scenarios()` / `weighted_scenario_matrix()`
+- `classify_stage()` / `stage_migration_matrix()` / `stage_summary()`
+- `calculate_ecl()` / `ecl_by_stage()` / `portfolio_ecl()`
 
 ### Model Validation Metrics
 
@@ -335,43 +295,7 @@ def calculate_economic_capital(
 
 ## Regulatory Compliance
 
-### IFRS 9 Calculations
-
-Calculate IFRS 9 staging and provisions.
-
-```python
-def calculate_ifrs9_staging(
-    portfolio_data: pd.DataFrame,
-    transition_matrix: pd.DataFrame,
-    staging_rules: Dict[str, Any] = None
-) -> pd.DataFrame
-```
-
-**Parameters:**
-- `portfolio_data`: Current portfolio
-- `transition_matrix`: Transition probabilities
-- `staging_rules`: Custom staging criteria
-
-**Returns:** Portfolio with IFRS 9 stages
-
-### CECL Calculations
-
-Calculate CECL lifetime expected losses.
-
-```python
-def calculate_cecl_provisions(
-    portfolio_data: pd.DataFrame,
-    transition_matrix: pd.DataFrame,
-    economic_scenarios: List[Dict[str, float]] = None
-) -> pd.DataFrame
-```
-
-**Parameters:**
-- `portfolio_data`: Current portfolio
-- `transition_matrix`: Base transition matrix
-- `economic_scenarios`: Economic scenario adjustments
-
-**Returns:** CECL provision calculations
+For IFRS 9 staging, ECL calculation, and stress testing see the **[IFRS 9 API Reference](ifrs9.md)**.
 
 ## Utility Functions
 
@@ -505,5 +429,6 @@ def run_stress_tests(baseline_matrix, portfolio_data):
 ## See Also
 
 - [TransitionMatrixLearner API](transition_matrix_learner.md)
+- [IFRS 9 API Reference](ifrs9.md)
 - [Visualization Functions](visualization.md)
 - [Mathematical Background](../theory/pd_calculations.md)
